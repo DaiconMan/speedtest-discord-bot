@@ -35,7 +35,7 @@ async def speedtest_loop():
     # 1行目: ISP, Server
     embed.add_field(name="ISP", value=result["isp"], inline=True)
     embed.add_field(name="Server", value=f"{get_flag(result['country_code'])} {result['server']} ({result['country_code']})", inline=True)
-    embed.add_field(name="\u200b", value="\u200b", inline=True)  # 空白で改行調整
+    embed.add_field(name="", value="", inline=True)  # 空白で改行調整（□表示防止）
 
     # 2行目: Download, Upload, Ping
     embed.add_field(
