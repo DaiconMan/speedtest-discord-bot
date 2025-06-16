@@ -3,7 +3,7 @@ from discord.ext import tasks
 import os
 import asyncio
 from speedtest import run_speedtest, get_ping_status, get_flag
-from datetime import datetime
+from datetime import datetime, timedelta
 
 TOKEN_PATH = "/run/secrets/DISCORD_TOKEN"
 CHANNEL_ID_PATH = "/run/secrets/DISCORD_CHANNEL_ID"
@@ -22,10 +22,23 @@ last_result = None
 @client.event
 async def on_ready():
     print(f"Logged in as {client.user}")
-    speedtest_loop.start()
+    await post_speedtest()  # 初回即時投稿
+    speedtest_scheduler.start()
+    ping_status_loop.start()
 
-@tasks.loop(hours=1)
-async def speedtest_loop():
+@tasks.loop(minutes=1)
+async def speedtest_scheduler():
+    now = datetime.now()
+    if now.minute == 0:
+        await post_speedtest()
+
+@tasks.loop(minutes=5)
+async def ping_status_loop():
+    result = run_speedtest()
+    ping = result["ping"]
+    await client.change_presence(activity=discord.Game(name=f"Ping: {ping} ms"))
+
+async def post_speedtest():
     global last_result
     channel = client.get_channel(CHANNEL_ID)
     result = run_speedtest()
@@ -35,30 +48,16 @@ async def speedtest_loop():
     # 1行目: ISP, Server
     embed.add_field(name="ISP", value=result["isp"], inline=True)
     embed.add_field(name="Server", value=f"{get_flag(result['country_code'])} {result['server']} ({result['country_code']})", inline=True)
-    embed.add_field(name="", value="", inline=True)  # 空白で改行調整（□表示防止）
+    embed.add_field(name="", value="", inline=True)  # 折り返し用
 
     # 2行目: Download, Upload, Ping
-    embed.add_field(
-        name="Download",
-        value=f"{result['download']} Mbps {diff(last_result, result, 'download')}",
-        inline=True
-    )
-    embed.add_field(
-        name="Upload",
-        value=f"{result['upload']} Mbps {diff(last_result, result, 'upload')}",
-        inline=True
-    )
-    embed.add_field(
-        name="Ping",
-        value=f"{result['ping']} ms {get_ping_status(result['ping'])}",
-        inline=True
-    )
+    embed.add_field(name="Download", value=f"{result['download']} Mbps {diff(last_result, result, 'download')}", inline=True)
+    embed.add_field(name="Upload", value=f"{result['upload']} Mbps {diff(last_result, result, 'upload')}", inline=True)
+    embed.add_field(name="Ping", value=f"{result['ping']} ms {get_ping_status(result['ping'])}", inline=True)
 
     embed.set_footer(text=datetime.now().strftime("%Y年%m月%d日 %H:%M"))
 
     await channel.send(embed=embed)
-    await client.change_presence(activity=discord.Game(name=f"Ping: {result['ping']} ms"))
-
     last_result = result
 
 def diff(prev, curr, key):
