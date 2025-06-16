@@ -1,7 +1,6 @@
 import subprocess
 import json
 from datetime import datetime
-import pytz
 
 def run_speedtest():
     result = subprocess.run(
@@ -9,8 +8,8 @@ def run_speedtest():
         capture_output=True
     )
     data = json.loads(result.stdout)
-    tz = pytz.timezone("Asia/Tokyo")
-    now = datetime.now(tz)
+    now = datetime.now()
+    now.strftime("%Y年%m月%d日 %H:%M")
     return {
         "isp": data["isp"],
         "server": data["server"]["name"],
