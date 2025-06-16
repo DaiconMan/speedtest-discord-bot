@@ -45,17 +45,15 @@ async def post_speedtest():
 
     embed = discord.Embed(title="📡 Speedtest.net Result", color=discord.Color.blue())
 
-    # 1行目: ISP, Server
     embed.add_field(name="ISP", value=result["isp"], inline=True)
     embed.add_field(name="Server", value=f"{get_flag(result['country_code'])} {result['server']} ({result['country_code']})", inline=True)
-    embed.add_field(name="", value="", inline=True)  # 折り返し用
+    embed.add_field(name="", value="", inline=True)
 
-    # 2行目: Download, Upload, Ping
     embed.add_field(name="Download", value=f"{result['download']} Mbps {diff(last_result, result, 'download')}", inline=True)
     embed.add_field(name="Upload", value=f"{result['upload']} Mbps {diff(last_result, result, 'upload')}", inline=True)
     embed.add_field(name="Ping", value=f"{result['ping']} ms {get_ping_status(result['ping'])}", inline=True)
 
-    embed.set_footer(text=datetime.now().strftime("%Y年%m月%d日 %H:%M"))
+    embed.set_footer(text=result["timestamp"])
 
     await channel.send(embed=embed)
     last_result = result
