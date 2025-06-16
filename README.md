@@ -38,7 +38,10 @@ git push origin main
 
 1. Discord Developer PortalでBotを作成
 2. Bot Tokenを取得
-3. サーバーにBotを招待し、**「メッセージ送信・プレゼンス更新」** 権限を付与
+3. サーバーにBotを招待し、**以下の権限を付与**
+   - メッセージ送信
+   - 埋め込みリンク（Embed Links）✅
+   - プレゼンスの表示（Botのステータスメッセージ）
 4. 投稿先のチャンネルIDを控える
 
 ---
