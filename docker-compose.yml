@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  speedtest-bot:
+    image: ghcr.io/yourusername/speedtest-bot:latest
+    secrets:
+      - DISCORD_TOKEN
+      - DISCORD_CHANNEL_ID
+    deploy:
+      mode: replicated
+      replicas: 1
+    restart: unless-stopped
+
+secrets:
+  DISCORD_TOKEN:
+    external: true
+  DISCORD_CHANNEL_ID:
+    external: true
